@@ -2,17 +2,18 @@ assume cs:code, ds:data
 
 data segment
     ;下面表示21年的21个字符串
-    years db '1975','1976','1977','1978','1979','1980','1981','1982','1983','1984','1985','1986','1987','1988','1989','1990','1991','1992','1993','1994','1995' $
+    years db '1975','1976','1977','1978','1979','1980','1981','1982','1983','1984','1985','1986','1987','1988','1989','1990','1991','1992','1993','1994','1995', $
     ;下面表示21年公司总收入的21个dword型数据
-    total dd 16,22,382,1356,2390,8000,16000,24486,50065,97479,140417,197514,345980,590827,803530,1183000,1843000,2759000,3753000,4649000,5937000 $
+    total dd 16,22,382,1356,2390,8000,16000,24486,50065,97479,140417,197514,345980,590827,803530,1183000,1843000,2759000,3753000,4649000,5937000,$
     ;下面是表示21年公司雇员人数的21个word型数据
-    employees dw 3,7,9,13,28,38,130,220,476,778,1001,1442,2258,2793,4037,5635,8226,11542,14430,15257,17800 $
+    employees dw 3,7,9,13,28,38,130,220,476,778,1001,1442,2258,2793,4037,5635,8226,11542,14430,15257,17800, $
 data ends
 
 ; 每行显示的样式  'year summ ne ??
 
 code segment
-start:  mov ax, data    ;数据段的地址
+start:  
+        mov ax, data    ;数据段的地址
         mov ds, ax
         mov si, 0
 		
@@ -26,14 +27,15 @@ start:  mov ax, data    ;数据段的地址
         mov dh, 2 
         mov dl, 5
         mov bl, 4
-        call display_string
+        call display_years
 
         mov ax, 4c00h
 	    int 21h
 
+
 ;显示所有的年份
-display_string: 
-    mov cx, 20 
+display_years: 
+    mov cx, 21 
 display_loop:
     call position
     call display_one_year; 显示年份
@@ -45,6 +47,7 @@ display_end:
     ret
     
 
+;将ds:[si]中的bl个字节送到es:[di],显示出来
 display_string: 
     push cx  ; 写入年份，si是原始数据， di是显存数据
     mov cx, bl; 移动四个字节
@@ -57,11 +60,11 @@ one_year_loop:
     add si, 1
     dec cx
     jmp one_year_loop
-
 one_year_end:
     pop cx
     ret
  
+
 display_info_test: ; 显示收入
     mov ax, ds:[bx]
     mov es:[si], ax;
@@ -81,7 +84,7 @@ display_info_test: ; 显示收入
 	mov es:[si+13], ax
     ret
 
-;将数字显示在屏幕上
+;将ds:[si]中的bl个字节送到es:[di],显示出数字
 dtoc:	
     mov cx, 10
 	mov dx, 0
