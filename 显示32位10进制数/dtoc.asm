@@ -40,15 +40,12 @@ display:
     mov ds:[si], ax
     mov ds:[si+2], dx
     jmp  display
-
 send:
     add cl, 30H
     mov ch, 24h
     mov es:[di], cx
     ret
     
-
-
 ;mdiv 除法, 商的高位在dx，低位在ax， 余数在cx
 mdiv:
     mov ax, ds:[si+2]

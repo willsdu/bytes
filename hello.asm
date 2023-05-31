@@ -13,9 +13,7 @@ data segment
     ;以上是表示21年公司雇员人数的21个word型数据
 data ends
 
-
 code segment
-				
 start:
 	;数据段的地址  
 	mov ax, data
@@ -25,29 +23,43 @@ start:
 	;显存开始地址
 	mov ax, 0b800h
     mov es, ax 
-    mov di, 10h
+    mov di, 30h
 
-s:  ;显示公司的总体数据
-	mov ax, 21
+lps:  ;显示公司的总体数据
+	mov ax, 1
 	push ax
 	;显示年份
 	mov cx, 4
 	call display_string
 	add di, 10h
 	;显示总收入
-	add si, 54h
-	call dtoc
+	add si, 50h
+	call display_32_integer
+    add si, 4H
 	add di, 10h
 	;显示雇员人数
-	add si, 54h
-	call dtoc
+	add si, 50h
+    mov ax, ds:[si]
+	call display_16_integer
 	pop ax
-	sub ax, 1
-	cmp 0
-	je far ptr stop
+	add ax, 1
+	cmp ax, 15h
+	je start_end
+    push ax
+    mov bx, 4H
+    mul bx
+    add si, ax
+    add di, 60h
+    jmp lps
 
+start_end:
+	mov ax, 04c00h
+    int 21h
+    ret
+
+    
 display_string:
-	jmp display_string_return 
+	jcxz display_string_return 
 	mov ah, 24h
 	mov al, ds:[si]
 	mov es:[di], ax
@@ -55,31 +67,45 @@ display_string:
 	add di, 2
 	sub cx, 1
 	jmp display_string
-display_string:
+display_string_return:
 	ret
 				
-dtoc:
-    call mdiv
+display_32_integer:
+    call div32
     mov bx, ax
     add bx, dx
     cmp bx, 0
-    je send
+    je display_32_integer_return
     add cl, 30H
     mov ch, 24h
     mov es:[di], cx
     sub di, 2
-
 	mov ds:[si], ax
 	mov ds:[si+2], dx
-    jmp  dtoc
-send:
+    jmp  display_32_integer
+display_32_integer_return:
     add cl, 30H
     mov ch, 24h
     mov es:[di], cx
     ret
 
+display_16_integer:
+    call div16
+    cmp ax, 0
+    je display_16_integer_return
+    add dl, 30H
+    mov dh, 24h
+    mov es:[di], dx
+    sub di, 2
+    jmp  display_16_integer
+display_16_integer_return:
+    add dl, 30H
+    mov dh, 24h
+    mov es:[di], dx
+    ret
+
 ;mdiv 除法, 商的高位在dx，低位在ax， 余数在cx
-mdiv:
+div32:
     mov ax, ds:[si+2]
     mov dx, 0
     mov bx, 0ah
@@ -92,9 +118,12 @@ mdiv:
 	mov cx, bx	
     ret
 
-stop:
-	mov ax, 04c00h
-    int 21h
+div16:
+    mov dx, 0
+    mov bx, 0ah
+    div bx
+    ret
+
 
 code ends
 end start
