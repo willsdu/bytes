@@ -25,31 +25,52 @@ start:
     mov es, ax 
     mov di, 30h
 
-lps:  ;显示公司的总体数据
-	mov ax, 1
+    mov ax, 0
 	push ax
-	;显示年份
-	mov cx, 4
+lps:;显示公司的总体数据
+    ;计算偏移位置
+	pop ax
+    push ax
+    mov bx, 4
+    mul bx
+    mov si, 0 
+    mov si, ax
+    ;显示年份
+    mov cx, 4
 	call display_string
-	add di, 10h
-	;显示总收入
-	add si, 50h
+	add di, 20h
+    ;计算偏移位置
+	pop ax
+    push ax
+    mov bx, 4
+    mul bx 
+    mov si, 0 
+    mov si, ax
+    add si, 50h
+    ;显示总收入
 	call display_32_integer
-    add si, 4H
-	add di, 10h
-	;显示雇员人数
-	add si, 50h
+	add di, 20h
+	;计算偏移位置
+	pop ax
+    push ax
+    mov bx, 4
+    mul bx 
+    mov si, 0
+    mov si, ax
+	add si, 0a0h
     mov ax, ds:[si]
+    ;显示雇员人数
 	call display_16_integer
+    ;循环重置
 	pop ax
 	add ax, 1
+    push ax
 	cmp ax, 15h
 	je start_end
-    push ax
-    mov bx, 4H
-    mul bx
-    add si, ax
-    add di, 60h
+    mov di, 30H
+    mov bx, 0a0h
+    mul bx 
+    add di, ax
     jmp lps
 
 start_end:
