@@ -144,7 +144,6 @@ div16:
     mov bx, 0ah
     div bx
     ret
-
-
+    
 code ends
 end start
