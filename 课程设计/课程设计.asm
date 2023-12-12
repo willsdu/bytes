@@ -28,7 +28,6 @@ str ends
 
 
 
-
 code segment
 start:
     ;数据段的地址
@@ -76,6 +75,7 @@ show_table_body:
     mov si, 0           ;str  地址
     mov di, 0           ;每年数据的移动地址
 
+    ;写入年份
     mov ax,es:[bx+di]
     mov ds:[si], ax
     add di,2
@@ -91,6 +91,50 @@ show_table_body:
     mov dl, ds:[11h]
     mov cl, ds:[12h]
     call show_str
+
+
+    ;写入收入
+    mov si, 0
+    inc di
+    mov ax, es:[bx+di]
+    add di, 2
+    mov dx, es:[bx+di]
+    add di, 2
+    call dtoc_dword
+
+    mov dh, ds:[10h]
+    mov dl, ds:[11h]
+    add dl, 06
+    mov cl, ds:[12h]
+    call show_str
+
+    ;写入员工数
+    mov si,0
+    inc di
+    mov ax, es:[bx+di]
+    add di, 2
+    mov dx, 0
+    call dtoc_dword
+
+    mov dh, ds:[10h]
+    mov dl, ds:[11h]
+    add dl, 0FH
+    mov cl, ds:[12h]
+    call show_str
+
+    ;写入员工价值
+    mov si,0
+    inc di
+    mov ax, es:[bx+di]
+    add di, 2
+    mov dx, 0
+    call dtoc_dword
+
+    mov dh, ds:[10h]
+    mov dl, ds:[11h]
+    add dl, 016H
+    mov cl, ds:[12h]
+    call show_str
     
     inc dh
     mov ds:[10h], dh
@@ -99,6 +143,71 @@ show_table_body:
     pop cx
     ret
 
+
+;功能：将dword型数据转为十进制，存入str段中
+;参数：ds指向str段，si指向在str段的哪个地址开始存
+;     ax存放dword型数据的低16位，dx存放dword型数据的高16位  
+;返回：ds:si指向str段十进制数据的首地址                 
+dtoc_dword:
+    push cx
+    push bx
+    push ax
+    push dx
+    push si
+
+    mov bx, 0
+    dtoc_dword_push_rem: ; 余数入栈
+    mov cx, 000AH
+    call divdw
+    push cx
+    inc bx
+    mov cx, ax
+    add cx, dx
+    jcxz dtoc_dword_pop_rem
+    jmp short dtoc_dword_push_rem
+
+    dtoc_dword_pop_rem:
+    mov cx, bx
+    jcxz dtoc_dword_over
+    pop ax
+    add ax, 30H
+    mov ds:[si], ax
+    inc si
+    dec bx
+    loop dtoc_dword_pop_rem    
+    
+    dtoc_dword_over:
+    inc si
+    mov byte ptr ds:[si], 0
+    
+    pop si
+    pop dx
+    pop ax
+    pop bx
+    pop cx
+
+    ret
+
+
+;功能：计算dword型被除数与word型除数的除法
+;参数：ax=被除数低16位，dx=被除数高16位，cx = 除数
+;返回：ax=商的低16位，dx=商的高16位，   cx = 余数
+divdw:
+    push bx
+
+    mov bx, ax     ;先计算高位，将低位暂存
+    mov ax, dx
+    mov dx, 0
+    div cx        ;高位除法
+    push ax
+    mov ax, bx    ;高位除法后余数在DX，不用动
+    div cx        ;低位除法
+
+    mov cx, dx   ;余数在dx，给cx
+    pop dx       ;将栈中保存的高位商给dx
+
+    pop bx
+    ret
 
 
 
@@ -150,8 +259,8 @@ display_offset:
     mov ax, 0A0h
     mul dh
     mov dh, 0
-    add al, dl
-    add al, dl
+    add ax, dx
+    add ax, dx
     mov dx, ax
 
     pop ax
