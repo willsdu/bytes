@@ -1,16 +1,18 @@
-DATAS SEGMENT ;定义数据段代码
-	STR1 DB 'Please enter a hexadecimal number',10,'$';定义提示字符串
-DATAS ENDS
+data segment
+ str1 db 'Please enter a hexadecimal number',10,'$';定义提示字符串
+data ends
 
-CODES SEGMENT
-ASSUME CS:CODES,DS:DATAS
-START: 
-	MOV AX,DATAS
-	MOV DS,AX ;将数据段的地址赋给DS
-	LEA DX,STR1 ;利用LEA直接将STR1的内容赋值到DX中
-	MOV AH,9H ;将9H赋值到AH中
-	INT 21H ;输出提示字符串
+code segment
+assume cs:code,ds:data
 
-CODES ENDS
-END START
+start:
+	mov ax, data
+	mov ds, ax
+	lea dx, str1
+	mov ah, 9h
+	int 21h
+
+code ends
+end start
+
 
