@@ -4,8 +4,8 @@ code  segment
 start:
     call install_int7c
     
-    mov ah, 2 
-    mov al, 1
+    mov ah, 3
+    mov al, 2
     int 7ch
 
     mov ax, 4c00H
@@ -150,7 +150,7 @@ set_tail_color:
 
     mov cx, 2000
     set_tail_color_loop:
-    and byte ptr es:[di],100011111b
+    and byte ptr es:[di],10001111b
     or es:[di], al
     add di, 2
     loop set_tail_color_loop
@@ -164,29 +164,36 @@ set_tail_color:
 scroll:
     push  ax 
     push  es  
+    push  ds
     push  di 
     push  cx 
+    push  si
 
-    mov ax, 0b800h
-    mov es, ax
+    mov di, 0b800h
+    mov es, di
+    mov ds, di
     mov di, 0
+    mov si, 160
+    cld 
+    mov cx, 24
 
-    mov cx, 2000
-    scroll_loop:
-    cmp di,4000-160
-    jae scroll_set_space
-    mov ax, es:[di+160]
-    jmp short scroll_set_value
-    scroll_set_space:
-    mov al, ' '
-    mov ah, 0
-    scroll_set_value:
-    mov es:[di], ax
-    add di, 2
-    loop scroll_loop
+    scroll_line_loop:
+    push cx
+    mov cx, 160
+    rep movsb
+    pop cx
+    loop scroll_line_loop
+
+    mov cx, 80
+    mov si, 0
+    scroll_last_loop:
+    mov byte ptr es:[160*24+si], ' '
+    add si, 2
+    loop scroll_last_loop
 
     pop cx 
     pop di
+    pop ds
     pop es
     pop ax
     ret 

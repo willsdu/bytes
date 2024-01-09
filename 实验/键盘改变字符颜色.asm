@@ -111,7 +111,7 @@ display_alphabet:
     ret
 
 ;功能： 实现睡眠功能
-;参数： ax, 需要睡眠的秒数
+;参数： ax需要睡眠的秒数
 sleep:
     push ax
     push dx
